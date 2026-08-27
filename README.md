@@ -12,7 +12,9 @@
 A faithful 1:1 Rust port of the original llm.c pure-CPU reference, living in [`gpt2/`](gpt2/):
 
 ```bash
-cd gpt2
+git clone https://github.com/YoungHaKim7/rust_gpt-2_impl.git
+cd rust_gpt-2_impl
+git submodule update --init
 make            # builds train_gpt2, test_gpt2, gen_synth (binaries named like the C ones)
 make test       # unit tests (mt19937 vs torch, matmul equivalence, finite-difference gradient check)
 make verify     # compiles the original llm.c with gcc and compares both step by step

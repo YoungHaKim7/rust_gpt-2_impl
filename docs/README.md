@@ -1,4 +1,20 @@
-Done. The complete Rust port is delivered and verified against the original.
+# fix
+
+```bash
+`make verify` now passes end to end — 46/46 loss values match the original C implementation with max abs diff `0.000e+00`, and all non-timing output is byte-identical.
+
+**What was wrong** — the script still assumed the old repo layout where this port lived as a subdirectory *inside* an llm.c checkout:
+
+1. `dev/verify_vs_c.sh:10-11` — `REPO_ROOT` went two levels up from `dev/` and then appended `rust_gpt-2_impl`, producing paths for the old nested location. The repo is standalone now, so I changed it to one level up with `CRATE_DIR="$REPO_ROOT"` (`dev/verify_vs_c.sh:10`).
+2. The `llm.c` reference (a bare gitlink pinned to commit `f1e2ace`, no `.gitmodules`) had been deleted from disk. I re-cloned karpathy/llm.c into `llm.c/` and checked out that exact pinned commit, so `git status` is clean again and the C build step has its source.
+
+Two things you may want to clean up (left alone for now):
+
+- **`gpt2/` directory** — a stale, tracked duplicate of the crate (older `src/bin/*.rs`, its own `Makefile`/`dev/`). It looks like leftover from the restructure; safe to `git rm -r gpt2` if it's not intentional.
+- **Missing `.gitmodules`** — the `llm.c` gitlink has no submodule config, so a fresh clone can't restore it with `git submodule update --init`. Adding one pointing at `https://github.com/karpathy/llm.c` would make `make verify` reproducible for anyone else.
+```
+
+- Done. The complete Rust port is delivered and verified against the original.
 
 ## What was built — `gpt2/` (~3,000 lines, new crate at repo root)
 
