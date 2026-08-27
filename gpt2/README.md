@@ -1,3 +1,92 @@
+# Run
+
+
+```bash
+$ make
+cargo build --release --bin train_gpt2
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --bin test_gpt2
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --bin gen_synth
+    Finished `release` profile [optimized] target(s) in 0.01s
+```
+
+- `make test`
+
+```bash
+$ make test
+cargo test --release
+   Compiling gpt2 v0.1.0 (/home/gygy/my_projects/C_Lang/rust_gpt-2_impl/gpt2)
+    Finished `release` profile [optimized] target(s) in 0.06s
+     Running unittests src/lib.rs (target/release/deps/gpt2-efad2e91cc470f06)
+
+running 2 tests
+test llmc::rand::tests::mt19937_matches_torch_reference ... ok
+test llmc::rand::tests::random_permutation_is_deterministic_and_bijective ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/gen_synth.rs (target/release/deps/gen_synth-f0600908f607900d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/test_gpt2.rs (target/release/deps/test_gpt2-313dd43eef96e67e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/train_gpt2.rs (target/release/deps/train_gpt2-9f7e5ed6268c6256)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/unit.rs (target/release/deps/unit-e7e44cb6ded71bf8)
+
+running 4 tests
+test dataloader_serves_shifted_batches_and_wraps ... ok
+test tokenizer_roundtrip ... ok
+test matmul_forward_tiled_matches_naive ... ok
+test finite_difference_gradient_check ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+   Doc-tests gpt2
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+- `make verify`
+```bash
+
+$ make verify
+bash dev/verify_vs_c.sh
+== building Rust binaries (release) ==
+    Finished `release` profile [optimized] target(s) in 0.01s
+== building original C reference ==
+== generating identical synthetic data for both ==
+wrote /tmp/tmp.l7vNC75dKy/c/gpt2_124M.bin (867072 params)
+wrote /tmp/tmp.l7vNC75dKy/c/gpt2_tokenizer.bin
+wrote 5120 train + 2048 val tokens under /tmp/tmp.l7vNC75dKy/c/dev/data/tinyshakespeare
+wrote /tmp/tmp.l7vNC75dKy/rs/gpt2_124M.bin (867072 params)
+wrote /tmp/tmp.l7vNC75dKy/rs/gpt2_tokenizer.bin
+wrote 5120 train + 2048 val tokens under /tmp/tmp.l7vNC75dKy/rs/dev/data/tinyshakespeare
+== running the C reference ==
+== running the Rust port ==
+== checking run lengths ==
+C emitted 46 loss values, Rust emitted 46
+== comparing loss trajectories ==
+compared 46 loss values: max abs diff = 0.000e+00 (at #0)
+loss trajectories match
+== comparing all other output (headers, generation text), ignoring timings ==
+non-timing output is byte-identical
+DIFFERENTIAL TEST PASSED
+```
+
 # gpt2 — llm.c in Rust
 
 A faithful Rust port of [karpathy/llm.c](https://github.com/karpathy/llm.c)'s
