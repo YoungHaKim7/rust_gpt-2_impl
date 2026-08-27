@@ -35,7 +35,9 @@ pub fn fopen_check(path: &str, mode: &str) -> File {
             eprintln!("Error details:");
             eprintln!("  Path: {path}");
             eprintln!("  Mode: {mode}");
-            eprintln!("---> HINT 1: dataset files/code have moved to dev/data recently (May 20, 2024). You may have to mv them from the legacy data/ dir to dev/data/(dataset), or re-run the data preprocessing script. Refer back to the main README");
+            eprintln!(
+                "---> HINT 1: dataset files/code have moved to dev/data recently (May 20, 2024). You may have to mv them from the legacy data/ dir to dev/data/(dataset), or re-run the data preprocessing script. Refer back to the main README"
+            );
             eprintln!("---> HINT 2: possibly try to re-run `python train_gpt2.py`");
             exit(1);
         }
@@ -93,23 +95,19 @@ pub fn read_bytes(stream: &mut File, n: usize) -> Vec<u8> {
 }
 
 pub fn read_u32s(stream: &mut File, n: usize) -> Vec<u32> {
-    bytemuck::cast_slice(&read_bytes(stream, n * 4))
-        .to_vec()
+    bytemuck::cast_slice(&read_bytes(stream, n * 4)).to_vec()
 }
 
 pub fn read_i32s(stream: &mut File, n: usize) -> Vec<i32> {
-    bytemuck::cast_slice(&read_bytes(stream, n * 4))
-        .to_vec()
+    bytemuck::cast_slice(&read_bytes(stream, n * 4)).to_vec()
 }
 
 pub fn read_f32s(stream: &mut File, n: usize) -> Vec<f32> {
-    bytemuck::cast_slice(&read_bytes(stream, n * 4))
-        .to_vec()
+    bytemuck::cast_slice(&read_bytes(stream, n * 4)).to_vec()
 }
 
 pub fn read_u16s(stream: &mut File, n: usize) -> Vec<u16> {
-    bytemuck::cast_slice(&read_bytes(stream, n * 2))
-        .to_vec()
+    bytemuck::cast_slice(&read_bytes(stream, n * 2)).to_vec()
 }
 
 pub fn write_f32s(stream: &mut File, vals: &[f32]) {

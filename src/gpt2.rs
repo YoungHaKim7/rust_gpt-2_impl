@@ -3,8 +3,8 @@
 // defines: GPT2 (build_from_checkpoint, gpt2_forward, gpt2_zero_grad,
 //                  gpt2_backward, gpt2_update)
 
-use crate::llmc::utils::{fopen_check, read_f32s, read_i32s};
 use crate::layers::*;
+use crate::llmc::utils::{fopen_check, read_f32s, read_i32s};
 use crate::model::{
     ActivationTensors, GPT2Config, NUM_ACTIVATION_TENSORS, NUM_PARAMETER_TENSORS, ParameterTensors,
     fill_in_activation_sizes, fill_in_parameter_sizes, malloc_and_point_activations,
@@ -35,8 +35,8 @@ pub struct GPT2 {
     pub grads_acts_memory: Option<Vec<f32>>,
     // other run state configuration
     pub batch_size: usize, // the batch size (B) of current forward pass
-    pub seq_len: usize, // the sequence length (T) of current forward pass
-    pub inputs: Vec<i32>, // the input tokens for the current forward pass
+    pub seq_len: usize,    // the sequence length (T) of current forward pass
+    pub inputs: Vec<i32>,  // the input tokens for the current forward pass
     pub targets: Vec<i32>, // the target tokens for the current forward pass
     pub mean_loss: f32, // after a forward pass with targets, will be populated with the mean loss
 }
@@ -160,7 +160,10 @@ impl GPT2 {
             // validate B,T is consistent with how we've allocated the memory before
             // in principle we could get more clever here in the future, for now this is safest
             if B != self.batch_size || T != self.seq_len {
-                println!("Model: B={} T={}, Desired: B={} T={}", self.batch_size, self.seq_len, B, T);
+                println!(
+                    "Model: B={} T={}, Desired: B={} T={}",
+                    self.batch_size, self.seq_len, B, T
+                );
                 exit(1);
             }
         }
@@ -189,11 +192,32 @@ impl GPT2 {
         for l in 0..L {
             // get the views of the activations for this layer
             // (all disjoint inside acts_memory; split_disjoint checks that)
-            let residual_range =
-                if l == 0 { a.encoded.range(0, B * T * C) } else { a.residual3.range((l - 1) * B * T * C, B * T * C) };
-            let [l_ln1, l_ln1_mean, l_ln1_rstd, l_qkv, l_atty, l_preatt, l_att, l_attproj, l_residual2,
-                l_ln2, l_ln2_mean, l_ln2_rstd, l_fch, l_fch_gelu, l_fcproj, l_residual3, residual] =
-                split_disjoint(acts_memory, [
+            let residual_range = if l == 0 {
+                a.encoded.range(0, B * T * C)
+            } else {
+                a.residual3.range((l - 1) * B * T * C, B * T * C)
+            };
+            let [
+                l_ln1,
+                l_ln1_mean,
+                l_ln1_rstd,
+                l_qkv,
+                l_atty,
+                l_preatt,
+                l_att,
+                l_attproj,
+                l_residual2,
+                l_ln2,
+                l_ln2_mean,
+                l_ln2_rstd,
+                l_fch,
+                l_fch_gelu,
+                l_fcproj,
+                l_residual3,
+                residual,
+            ] = split_disjoint(
+                acts_memory,
+                [
                     a.ln1.range(l * B * T * C, B * T * C),
                     a.ln1_mean.range(l * B * T, B * T),
                     a.ln1_rstd.range(l * B * T, B * T),
@@ -211,7 +235,8 @@ impl GPT2 {
                     a.fcproj.range(l * B * T * C, B * T * C),
                     a.residual3.range(l * B * T * C, B * T * C),
                     residual_range,
-                ]);
+                ],
+            );
 
             // get the pointers of the weights for this layer
             let l_ln1w = p.ln1w.slice(params_memory, l * C, C);
@@ -228,27 +253,51 @@ impl GPT2 {
             let l_fcprojb = p.fcprojb.slice(params_memory, l * C, C);
 
             // now do the forward pass
-            layernorm_forward(l_ln1, l_ln1_mean, l_ln1_rstd, residual, l_ln1w, l_ln1b, B, T, C);
+            layernorm_forward(
+                l_ln1, l_ln1_mean, l_ln1_rstd, residual, l_ln1w, l_ln1b, B, T, C,
+            );
             matmul_forward(l_qkv, l_ln1, l_qkvw, Some(l_qkvb), B, T, C, 3 * C);
             attention_forward(l_atty, l_preatt, l_att, l_qkv, B, T, C, NH);
             matmul_forward(l_attproj, l_atty, l_attprojw, Some(l_attprojb), B, T, C, C);
             residual_forward(l_residual2, residual, l_attproj, B * T * C);
-            layernorm_forward(l_ln2, l_ln2_mean, l_ln2_rstd, l_residual2, l_ln2w, l_ln2b, B, T, C);
+            layernorm_forward(
+                l_ln2,
+                l_ln2_mean,
+                l_ln2_rstd,
+                l_residual2,
+                l_ln2w,
+                l_ln2b,
+                B,
+                T,
+                C,
+            );
             matmul_forward(l_fch, l_ln2, l_fcw, Some(l_fcb), B, T, C, 4 * C);
             gelu_forward(l_fch_gelu, l_fch, B * T * 4 * C);
-            matmul_forward(l_fcproj, l_fch_gelu, l_fcprojw, Some(l_fcprojb), B, T, 4 * C, C);
+            matmul_forward(
+                l_fcproj,
+                l_fch_gelu,
+                l_fcprojw,
+                Some(l_fcprojb),
+                B,
+                T,
+                4 * C,
+                C,
+            );
             residual_forward(l_residual3, l_residual2, l_fcproj, B * T * C);
         }
         // last residual is in residual3
-        let [lnf, lnf_mean, lnf_rstd, logits, probs, losses, residual] = split_disjoint(acts_memory, [
-            a.lnf.range(0, B * T * C),
-            a.lnf_mean.range(0, B * T),
-            a.lnf_rstd.range(0, B * T),
-            a.logits.range(0, B * T * Vp),
-            a.probs.range(0, B * T * Vp),
-            a.losses.range(0, B * T),
-            a.residual3.range((L - 1) * B * T * C, B * T * C),
-        ]);
+        let [lnf, lnf_mean, lnf_rstd, logits, probs, losses, residual] = split_disjoint(
+            acts_memory,
+            [
+                a.lnf.range(0, B * T * C),
+                a.lnf_mean.range(0, B * T),
+                a.lnf_rstd.range(0, B * T),
+                a.logits.range(0, B * T * Vp),
+                a.probs.range(0, B * T * Vp),
+                a.losses.range(0, B * T),
+                a.residual3.range((L - 1) * B * T * C, B * T * C),
+            ],
+        );
         layernorm_forward(
             lnf,
             lnf_mean,
@@ -260,7 +309,16 @@ impl GPT2 {
             T,
             C,
         );
-        matmul_forward(logits, lnf, p.wte.slice(params_memory, 0, Vp * C), None, B, T, C, Vp);
+        matmul_forward(
+            logits,
+            lnf,
+            p.wte.slice(params_memory, 0, Vp * C),
+            None,
+            B,
+            T,
+            C,
+            Vp,
+        );
         softmax_forward(probs, logits, B, T, V, Vp);
 
         // also forward the cross-entropy loss function if we have the targets
@@ -346,19 +404,25 @@ impl GPT2 {
 
         // the final layernorm and classifier, before the layer loop
         {
-            let [dlogits, dlosses, dlnf, dresidual] = split_disjoint(grads_acts_memory, [
-                ga.logits.range(0, B * T * Vp),
-                ga.losses.range(0, B * T),
-                ga.lnf.range(0, B * T * C),
-                ga.residual3.range((L - 1) * B * T * C, B * T * C),
-            ]);
+            let [dlogits, dlosses, dlnf, dresidual] = split_disjoint(
+                grads_acts_memory,
+                [
+                    ga.logits.range(0, B * T * Vp),
+                    ga.losses.range(0, B * T),
+                    ga.lnf.range(0, B * T * C),
+                    ga.residual3.range((L - 1) * B * T * C, B * T * C),
+                ],
+            );
             let probs = a.probs.slice(acts_memory, 0, B * T * Vp);
             crossentropy_softmax_backward(dlogits, dlosses, probs, targets, B, T, V, Vp);
-            let [dwte, dlnfw, dlnfb] = split_disjoint(grads_memory, [
-                g.wte.range(0, Vp * C),
-                g.lnfw.range(0, C),
-                g.lnfb.range(0, C),
-            ]);
+            let [dwte, dlnfw, dlnfb] = split_disjoint(
+                grads_memory,
+                [
+                    g.wte.range(0, Vp * C),
+                    g.lnfw.range(0, C),
+                    g.lnfb.range(0, C),
+                ],
+            );
             matmul_backward(
                 dlnf,
                 dwte,
@@ -376,7 +440,8 @@ impl GPT2 {
                 dlnfw,
                 dlnfb,
                 dlnf,
-                a.residual3.slice(acts_memory, (L - 1) * B * T * C, B * T * C),
+                a.residual3
+                    .slice(acts_memory, (L - 1) * B * T * C, B * T * C),
                 p.lnfw.slice(params_memory, 0, C),
                 a.lnf_mean.slice(acts_memory, 0, B * T),
                 a.lnf_rstd.slice(acts_memory, 0, B * T),
@@ -387,8 +452,11 @@ impl GPT2 {
         }
 
         for l in (0..L).rev() {
-            let dresidual_range =
-                if l == 0 { ga.encoded.range(0, B * T * C) } else { ga.residual3.range((l - 1) * B * T * C, B * T * C) };
+            let dresidual_range = if l == 0 {
+                ga.encoded.range(0, B * T * C)
+            } else {
+                ga.residual3.range((l - 1) * B * T * C, B * T * C)
+            };
 
             // get the views of the activations for this layer (reads come from acts_memory)
             let l_ln1 = a.ln1.slice(acts_memory, l * B * T * C, B * T * C);
@@ -402,16 +470,32 @@ impl GPT2 {
             let l_ln2_mean = a.ln2_mean.slice(acts_memory, l * B * T, B * T);
             let l_ln2_rstd = a.ln2_rstd.slice(acts_memory, l * B * T, B * T);
             let l_fch = a.fch.slice(acts_memory, l * B * T * 4 * C, B * T * 4 * C);
-            let l_fch_gelu = a.fch_gelu.slice(acts_memory, l * B * T * 4 * C, B * T * 4 * C);
+            let l_fch_gelu = a
+                .fch_gelu
+                .slice(acts_memory, l * B * T * 4 * C, B * T * 4 * C);
             let residual = if l == 0 {
                 a.encoded.slice(acts_memory, 0, B * T * C)
             } else {
-                a.residual3.slice(acts_memory, (l - 1) * B * T * C, B * T * C)
+                a.residual3
+                    .slice(acts_memory, (l - 1) * B * T * C, B * T * C)
             };
 
             // get the views of the gradients of the activations for this layer
-            let [dl_ln1, dl_qkv, dl_atty, dl_preatt, dl_att, dl_attproj, dl_residual2, dl_ln2,
-                dl_fch, dl_fch_gelu, dl_fcproj, dl_residual3, dresidual] = split_disjoint(
+            let [
+                dl_ln1,
+                dl_qkv,
+                dl_atty,
+                dl_preatt,
+                dl_att,
+                dl_attproj,
+                dl_residual2,
+                dl_ln2,
+                dl_fch,
+                dl_fch_gelu,
+                dl_fcproj,
+                dl_residual3,
+                dresidual,
+            ] = split_disjoint(
                 grads_acts_memory,
                 [
                     ga.ln1.range(l * B * T * C, B * T * C),
@@ -431,21 +515,36 @@ impl GPT2 {
             );
 
             // get the views of the gradients of the weights for this layer
-            let [dl_ln1w, dl_ln1b, dl_qkvw, dl_qkvb, dl_attprojw, dl_attprojb, dl_ln2w, dl_ln2b,
-                dl_fcw, dl_fcb, dl_fcprojw, dl_fcprojb] = split_disjoint(grads_memory, [
-                g.ln1w.range(l * C, C),
-                g.ln1b.range(l * C, C),
-                g.qkvw.range(l * 3 * C * C, 3 * C * C),
-                g.qkvb.range(l * 3 * C, 3 * C),
-                g.attprojw.range(l * C * C, C * C),
-                g.attprojb.range(l * C, C),
-                g.ln2w.range(l * C, C),
-                g.ln2b.range(l * C, C),
-                g.fcw.range(l * 4 * C * C, 4 * C * C),
-                g.fcb.range(l * 4 * C, 4 * C),
-                g.fcprojw.range(l * C * 4 * C, C * 4 * C),
-                g.fcprojb.range(l * C, C),
-            ]);
+            let [
+                dl_ln1w,
+                dl_ln1b,
+                dl_qkvw,
+                dl_qkvb,
+                dl_attprojw,
+                dl_attprojb,
+                dl_ln2w,
+                dl_ln2b,
+                dl_fcw,
+                dl_fcb,
+                dl_fcprojw,
+                dl_fcprojb,
+            ] = split_disjoint(
+                grads_memory,
+                [
+                    g.ln1w.range(l * C, C),
+                    g.ln1b.range(l * C, C),
+                    g.qkvw.range(l * 3 * C * C, 3 * C * C),
+                    g.qkvb.range(l * 3 * C, 3 * C),
+                    g.attprojw.range(l * C * C, C * C),
+                    g.attprojb.range(l * C, C),
+                    g.ln2w.range(l * C, C),
+                    g.ln2b.range(l * C, C),
+                    g.fcw.range(l * 4 * C * C, 4 * C * C),
+                    g.fcb.range(l * 4 * C, 4 * C),
+                    g.fcprojw.range(l * C * 4 * C, C * 4 * C),
+                    g.fcprojb.range(l * C, C),
+                ],
+            );
 
             // get the pointers of the weights for this layer
             let l_ln1w = p.ln1w.slice(params_memory, l * C, C);
@@ -457,21 +556,84 @@ impl GPT2 {
 
             // backprop this layer
             residual_backward(dl_residual2, dl_fcproj, dl_residual3, B * T * C);
-            matmul_backward(dl_fch_gelu, dl_fcprojw, Some(dl_fcprojb), dl_fcproj, l_fch_gelu, l_fcprojw, B, T, 4 * C, C);
+            matmul_backward(
+                dl_fch_gelu,
+                dl_fcprojw,
+                Some(dl_fcprojb),
+                dl_fcproj,
+                l_fch_gelu,
+                l_fcprojw,
+                B,
+                T,
+                4 * C,
+                C,
+            );
             gelu_backward(dl_fch, l_fch, dl_fch_gelu, B * T * 4 * C);
-            matmul_backward(dl_ln2, dl_fcw, Some(dl_fcb), dl_fch, l_ln2, l_fcw, B, T, C, 4 * C);
-            layernorm_backward(dl_residual2, dl_ln2w, dl_ln2b, dl_ln2, l_residual2, l_ln2w, l_ln2_mean, l_ln2_rstd, B, T, C);
+            matmul_backward(
+                dl_ln2,
+                dl_fcw,
+                Some(dl_fcb),
+                dl_fch,
+                l_ln2,
+                l_fcw,
+                B,
+                T,
+                C,
+                4 * C,
+            );
+            layernorm_backward(
+                dl_residual2,
+                dl_ln2w,
+                dl_ln2b,
+                dl_ln2,
+                l_residual2,
+                l_ln2w,
+                l_ln2_mean,
+                l_ln2_rstd,
+                B,
+                T,
+                C,
+            );
             residual_backward(dresidual, dl_attproj, dl_residual2, B * T * C);
-            matmul_backward(dl_atty, dl_attprojw, Some(dl_attprojb), dl_attproj, l_atty, l_attprojw, B, T, C, C);
-            attention_backward(dl_qkv, dl_preatt, dl_att, dl_atty, l_qkv, l_att, B, T, C, NH);
-            matmul_backward(dl_ln1, dl_qkvw, Some(dl_qkvb), dl_qkv, l_ln1, l_qkvw, B, T, C, 3 * C);
-            layernorm_backward(dresidual, dl_ln1w, dl_ln1b, dl_ln1, residual, l_ln1w, l_ln1_mean, l_ln1_rstd, B, T, C);
+            matmul_backward(
+                dl_atty,
+                dl_attprojw,
+                Some(dl_attprojb),
+                dl_attproj,
+                l_atty,
+                l_attprojw,
+                B,
+                T,
+                C,
+                C,
+            );
+            attention_backward(
+                dl_qkv, dl_preatt, dl_att, dl_atty, l_qkv, l_att, B, T, C, NH,
+            );
+            matmul_backward(
+                dl_ln1,
+                dl_qkvw,
+                Some(dl_qkvb),
+                dl_qkv,
+                l_ln1,
+                l_qkvw,
+                B,
+                T,
+                C,
+                3 * C,
+            );
+            layernorm_backward(
+                dresidual, dl_ln1w, dl_ln1b, dl_ln1, residual, l_ln1w, l_ln1_mean, l_ln1_rstd, B,
+                T, C,
+            );
         }
         {
             // encoder_backward(grads.wte, grads.wpe, grads_acts.encoded, model->inputs, B, T, C)
             let [dencoded] = split_disjoint(grads_acts_memory, [ga.encoded.range(0, B * T * C)]);
-            let [dwte, dwpe] =
-                split_disjoint(grads_memory, [g.wte.range(0, Vp * C), g.wpe.range(0, T * C)]);
+            let [dwte, dwpe] = split_disjoint(
+                grads_memory,
+                [g.wte.range(0, Vp * C), g.wpe.range(0, T * C)],
+            );
             encoder_backward(dwte, dwpe, dencoded, inputs, B, T, C);
         }
     }
@@ -494,7 +656,14 @@ impl GPT2 {
             self.v_memory = Some(vec![0.0f32; self.num_parameters]);
         }
 
-        let GPT2 { params_memory, grads_memory, m_memory, v_memory, num_parameters, .. } = self;
+        let GPT2 {
+            params_memory,
+            grads_memory,
+            m_memory,
+            v_memory,
+            num_parameters,
+            ..
+        } = self;
         let grads_memory = grads_memory
             .as_mut()
             .expect("grads not allocated; call gpt2_backward first");
@@ -516,7 +685,8 @@ impl GPT2 {
             // update
             m_memory[i] = m;
             v_memory[i] = v;
-            params_memory[i] -= learning_rate * (m_hat / (v_hat.sqrt() + eps) + weight_decay * param);
+            params_memory[i] -=
+                learning_rate * (m_hat / (v_hat.sqrt() + eps) + weight_decay * param);
         }
     }
 }

@@ -65,7 +65,11 @@ pub fn attention_forward(
                         expsum += expv;
                         att_bth[t2] = expv;
                     }
-                    let expsum_inv = if expsum == 0.0f32 { 0.0f32 } else { 1.0f32 / expsum };
+                    let expsum_inv = if expsum == 0.0f32 {
+                        0.0f32
+                    } else {
+                        1.0f32 / expsum
+                    };
 
                     // pass 3: normalize to get the softmax
                     for t2 in 0..T {
@@ -133,7 +137,8 @@ pub fn attention_backward(
                         // out_bth[i] += att_bth[t2] * value_t2[i];
                         // so now we have:
                         datt_bth[t2] += value_t2[i] * dout_bth[i];
-                        dinp[b * T * C3 + t2 * C3 + h * hs + C * 2 + i] += att_bth[t2] * dout_bth[i];
+                        dinp[b * T * C3 + t2 * C3 + h * hs + C * 2 + i] +=
+                            att_bth[t2] * dout_bth[i];
                     }
                 }
 
@@ -155,8 +160,10 @@ pub fn attention_backward(
                         // in the forward pass this was:
                         // preatt_bth[t2] += (query_t[i] * key_t2[i]) * scale;
                         // so now we have:
-                        dinp[b * T * C3 + t * C3 + h * hs + i] += key_t2[i] * dpreatt_bth[t2] * scale;
-                        dinp[b * T * C3 + t2 * C3 + h * hs + C + i] += query_t[i] * dpreatt_bth[t2] * scale;
+                        dinp[b * T * C3 + t * C3 + h * hs + i] +=
+                            key_t2[i] * dpreatt_bth[t2] * scale;
+                        dinp[b * T * C3 + t2 * C3 + h * hs + C + i] +=
+                            query_t[i] * dpreatt_bth[t2] * scale;
                     }
                 }
             }

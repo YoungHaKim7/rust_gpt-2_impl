@@ -12,8 +12,8 @@ use std::fs::File;
 use std::path::PathBuf;
 use std::process::exit;
 
-use super::rand::{init_identity_permutation, manual_seed, random_permutation, Mt19937State};
-use super::utils::{fseek_check, fopen_check, read_i32s, read_u16s};
+use super::rand::{Mt19937State, init_identity_permutation, manual_seed, random_permutation};
+use super::utils::{fopen_check, fseek_check, read_i32s, read_u16s};
 
 // ----------------------------------------------------------------------------
 // Distributed Data Loader
@@ -27,17 +27,17 @@ pub struct DataLoader {
     // batch and token information
     pub B: usize,
     pub T: usize,
-    pub num_tokens: usize, // total number of tokens
+    pub num_tokens: usize,        // total number of tokens
     pub shard_num_samples: usize, // total number of samples in the current shard per process
     // shards and current position
     pub shard_paths: Vec<PathBuf>, // the glob results, i.e. all shards we want to iterate
-    pub current_shard_idx: usize, // the current shard we are reading from
+    pub current_shard_idx: usize,  // the current shard we are reading from
     pub current_sample_idx: usize, // the current sample we are reading from
     // file handle
     pub tokens_file: Option<File>,
     // data buffers
-    pub buffer: Vec<u16>, // we fread data from file into this buffer
-    pub inputs: Vec<i32>, // input tokens into transformer
+    pub buffer: Vec<u16>,  // we fread data from file into this buffer
+    pub inputs: Vec<i32>,  // input tokens into transformer
     pub targets: Vec<i32>, // target tokens for the transformer
     // random shuffle related variables
     pub shuffle_rng: Mt19937State,
@@ -47,7 +47,7 @@ pub struct DataLoader {
     // sizes in bytes
     pub total_batch_size_bytes: usize, // total across all processes
     pub local_batch_offset_bytes: usize, // inner-sample offset for this process
-    pub header_bytes: usize, // header size in bytes
+    pub header_bytes: usize,           // header size in bytes
     pub file_size_bytes: i64,
 }
 
@@ -68,7 +68,9 @@ impl DataLoader {
         if header[0] != 20240520 {
             println!("Bad magic in the data file");
             println!("---> HINT: Are you passing in a correct file?");
-            println!("---> HINT: The data encoding may have changed, re-run data prepro or refer again to README.");
+            println!(
+                "---> HINT: The data encoding may have changed, re-run data prepro or refer again to README."
+            );
             exit(1);
         }
         if header[1] != 1 {
@@ -88,8 +90,7 @@ impl DataLoader {
             exit(1);
         }
         // -1 uint16_t due to us taking B*T+1 tokens but moving by B*T tokens
-        self.shard_num_samples =
-            (ntok as usize * 2 - 2) / self.total_batch_size_bytes;
+        self.shard_num_samples = (ntok as usize * 2 - 2) / self.total_batch_size_bytes;
         ntok
     }
 
@@ -226,7 +227,8 @@ impl DataLoader {
             self.current_sample_idx
         };
         let global_batch_offset_bytes = idx * self.total_batch_size_bytes;
-        let current_offset = (self.header_bytes + global_batch_offset_bytes + self.local_batch_offset_bytes) as i64;
+        let current_offset =
+            (self.header_bytes + global_batch_offset_bytes + self.local_batch_offset_bytes) as i64;
 
         let B = self.B;
         let T = self.T;

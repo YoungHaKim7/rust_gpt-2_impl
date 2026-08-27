@@ -81,14 +81,16 @@ fn next_state(state: &mut Mt19937State) {
     let mut j: usize = 0;
     while j < MERSENNE_STATE_N - MERSENNE_STATE_M {
         y = (state.state_[j] & UMASK) | (state.state_[j + 1] & LMASK);
-        state.state_[j] = state.state_[j + MERSENNE_STATE_M] ^ (y >> 1) ^ state.MATRIX_A[(y & 0x1) as usize];
+        state.state_[j] =
+            state.state_[j + MERSENNE_STATE_M] ^ (y >> 1) ^ state.MATRIX_A[(y & 0x1) as usize];
         j += 1;
     }
     while j < MERSENNE_STATE_N - 1 {
         y = (state.state_[j] & UMASK) | (state.state_[j + 1] & LMASK);
         // in C this is state_[j + (M - N)]; j >= N - M always holds here, so write it as j - (N - M)
-        state.state_[j] =
-            state.state_[j - (MERSENNE_STATE_N - MERSENNE_STATE_M)] ^ (y >> 1) ^ state.MATRIX_A[(y & 0x1) as usize];
+        state.state_[j] = state.state_[j - (MERSENNE_STATE_N - MERSENNE_STATE_M)]
+            ^ (y >> 1)
+            ^ state.MATRIX_A[(y & 0x1) as usize];
         j += 1;
     }
     y = (state.state_[MERSENNE_STATE_N - 1] & UMASK) | (state.state_[0] & LMASK);
