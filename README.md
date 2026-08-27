@@ -1,7 +1,9 @@
 # rust_gpt-2_impl
 - 러스트언어로 바꾸기 | llm.c를 사용하여 GPT-2 모델을 저렴하게 재구현하기 
   - https://github.com/karpathy/llm.c
-
+  - https://github.com/GaoYusong/llm.cpp
+  - https://github.com/ToJen/llm.rs
+  
 ## Rust port (this repo's implementation): `gpt2/`
 
 `llm.c/`의 순수 CPU 참조 구현(`train_gpt2.c` + `llmc/*.h`)을 Rust로 1:1 포팅한 크레이트.

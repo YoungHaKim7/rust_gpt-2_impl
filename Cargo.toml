@@ -1,0 +1,16 @@
+[package]
+name = "rust_gpt-2_impl"
+version = "0.1.0"
+edition = "2024"
+description = "Faithful Rust port of karpathy/llm.c's pure-CPU GPT-2 trainer (train_gpt2.c)"
+license = "MIT"
+
+[dependencies]
+rayon = "1.10"
+bytemuck = "1.16"
+glob = "0.3"
+
+[profile.release]
+# keep IEEE-strict float math (no fast-math equivalents), like the C reference
+# compiled without -Ofast; speeds up the kernels via codegen only
+debug = false
