@@ -10,6 +10,8 @@ Lambda에서 8X A100 80GB SXM 노드를 사용하면 시간당 약 $14, 총 비�
 - https://news.hada.io/topic?id=15065
 - LLM training in simple, raw C/CUDA
   - https://github.com/karpathy/llm.c
+    - Rust로 만든거(llm.c포크해서 만듬)
+      - https://github.com/yijunyu/llm.rs
 
 # RustGPT: Rust로 처음부터 완전히 구현한 순수 트랜스포머 LLM (github.com/tekaratzas)
 23P by GN⁺ 25-10-01
