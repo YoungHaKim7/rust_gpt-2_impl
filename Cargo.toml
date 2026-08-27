@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 description = "Faithful Rust port of karpathy/llm.c's pure-CPU GPT-2 trainer (train_gpt2.c)"
 license = "MIT"
+rust-version = "1.98"
 
 [dependencies]
 rayon = "1.10"
