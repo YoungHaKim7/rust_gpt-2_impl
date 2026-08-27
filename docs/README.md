@@ -1,3 +1,33 @@
+# divided conquer code
+
+- Done. The 1469-line `src/lib.rs` monolith is now divided by function into 11 files, following the same per-file pattern `src/llmc/` already uses:
+
+```
+src/
+├── lib.rs                  40   module root: crate attrs + flat re-exports (public API unchanged)
+├── tensor.rs               56   TensorView + split_disjoint (the one-big-allocation machinery)
+├── layers/                      one file per layer kernel, fwd + bwd together:
+│   ├── mod.rs              25   module list + re-exports
+│   ├── encoder.rs          54   encoder_forward / backward
+│   ├── layernorm.rs       102   layernorm_forward / backward
+│   ├── matmul.rs          157   matmul_forward_naive / forward / backward
+│   ├── attention.rs       165   attention_forward / backward
+│   ├── gelu.rs             28   GELU_SCALING_FACTOR, gelu_forward / backward
+│   ├── residual.rs         12   residual_forward / backward
+│   └── loss.rs             88   softmax_forward, crossentropy_forward / softmax_backward
+├── model.rs               274   GPT2Config, Parameter/ActivationTensors, fill_in_*_sizes, malloc_and_point_*
+└── gpt2.rs                524   GPT2 struct: build_from_checkpoint, forward, zero_grad, backward, update
+```
+
+**How it stays compatible:** the new modules are private and everything is re-exported at the crate root, so `rust_gpt_2_impl::{GPT2, GPT2Config, matmul_forward, malloc_and_point_parameters, ...}` — every import in the three bins and `tests/unit.rs` — resolves exactly as before. Code was moved verbatim; the only new lines are file-header comments, per-file `use rayon::prelude::*` where kernels need it, and the re-export block. I also updated the one stale row in `docs/README.md`'s port-mapping table.
+
+**Verified behavior-preserving:**
+- `cargo build --all-targets` and `cargo build --release` — clean
+- `cargo clippy --all-targets` — zero warnings
+- `cargo test` — 4/4 pass, including the finite-difference gradient check (exercises the full forward+backward path) and the matmul tiled-vs-naive equivalence test
+
+One judgment call to flag: `docs/lib.rs.md` (a ~1500-line narrative explanation of the old monolith) still describes the old single-file layout — I left it untouched since regenerating that walkthrough is a separate doc task. Happy to update it if you want.
+
 # fix
 
 ```bash
@@ -22,7 +52,7 @@ A 1:1 port of `llm.c`'s pure-CPU reference, keeping the original's names, loop s
 
 | llm.c (original)                                              | Port                    |
 | ------------------------------------------------------------- | ----------------------- |
-| `train_gpt2.c` — 13 layer kernels fwd/bwd, GPT-2 model, AdamW | `src/lib.rs`            |
+| `train_gpt2.c` — 13 layer kernels fwd/bwd, GPT-2 model, AdamW | `src/lib.rs` (root) + `src/layers/`, `src/model.rs`, `src/gpt2.rs`, `src/tensor.rs` |
 | `train_gpt2.c` — sampler + training `main()`                  | `src/bin/train_gpt2.rs` |
 | `test_gpt2.c`                                                 | `src/bin/test_gpt2.rs`  |
 | `llmc/{utils,tokenizer,dataloader,rand}.h`                    | `src/llmc/*.rs`         |
