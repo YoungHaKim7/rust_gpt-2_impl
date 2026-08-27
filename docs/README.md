@@ -28,6 +28,18 @@ src/
 
 One judgment call to flag: `docs/lib.rs.md` (a ~1500-line narrative explanation of the old monolith) still describes the old single-file layout — I left it untouched since regenerating that walkthrough is a separate doc task. Happy to update it if you want.
 
+# fix final
+
+- `make test` passes now — all tests green, no warnings.
+
+Two problems, both fixed in `src/lib.rs` (the test file itself was fine):
+
+1. **The compile error** — `matmul_forward_naive` exists and is `pub` in `src/layers/matmul.rs:9`, but was missing from the crate-root re-export list (`src/lib.rs:1556`), which is where `tests/unit.rs` imports it from per the crate's flat-API convention. I added it, along with `GELU_SCALING_FACTOR`, which also clears both `unused_imports` warnings.
+
+2. **A second failure the first one was hiding** — once the unit test compiled, rustdoc tried to execute the 103 illustrative code snippets in the big `//!` explanation block at the top of `lib.rs` as doctests, and 94 of them failed (they're fragments like `B, T, C, V` and bare type signatures, not runnable code). I marked them all ` ```rust,ignore ` so they keep Rust syntax highlighting but are excluded from testing.
+
+Final state: 6 unit tests pass (matmul-vs-naive, finite-difference gradient check, tokenizer, dataloader), 103 doc snippets ignored, 0 failures, 0 warnings.
+
 # fix
 
 ```bash

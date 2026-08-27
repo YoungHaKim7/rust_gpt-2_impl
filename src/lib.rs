@@ -31,19 +31,19 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! `lib.rs` is the conventional root module of a Rust **library crate**.
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub mod llmc;
 //! ```
 //!
 //! This declares a public module named `llmc`. Code outside this crate can access its public items.
 //!
-//! ```rust
+//! ```rust,ignore
 //! use rayon::prelude::*;
 //! ```
 //!
 //! This imports Rayon traits needed for parallel iteration, such as:
 //!
-//! ```rust
+//! ```rust,ignore
 //! .par_chunks_exact_mut(...)
 //! .for_each(...)
 //! ```
@@ -76,13 +76,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Instead:
 //!
-//! ```rust
+//! ```rust,ignore
 //! Vec<f32>
 //! ```
 //!
 //! owns one large allocation, and each tensor is represented by:
 //!
-//! ```rust
+//! ```rust,ignore
 //! TensorView {
 //! start: ...,
 //! len: ...,
@@ -107,7 +107,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 3. Compiler attributes
 //!
-//! ```rust
+//! ```rust,ignore
 //! #![allow(non_snake_case)]
 //! #![allow(clippy::too_many_arguments)]
 //! #![allow(clippy::needless_range_loop)]
@@ -119,13 +119,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Rust normally prefers:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let batch_size = 32;
 //! ```
 //!
 //! But machine-learning code conventionally uses mathematical names:
 //!
-//! ```rust
+//! ```rust,ignore
 //! B, T, C, V
 //! ```
 //!
@@ -135,7 +135,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Functions such as matrix multiplication naturally require many parameters:
 //!
-//! ```rust
+//! ```rust,ignore
 //! out, inp, weight, bias, B, T, C, OC
 //! ```
 //!
@@ -147,7 +147,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The comment says:
 //!
-//! ```rust
+//! ```rust,ignore
 //! // B = batch_size, T = sequence_length, C = channels, V = vocab_size
 //! ```
 //!
@@ -176,7 +176,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 5. `encoder_forward`: converting tokens into vectors
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub fn encoder_forward(
 //! out: &mut [f32],
 //! inp: &[i32],
@@ -192,7 +192,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Output
 //!
-//! ```rust
+//! ```rust,ignore
 //! out: &mut [f32]
 //! ```
 //!
@@ -200,7 +200,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Input tokens
 //!
-//! ```rust
+//! ```rust,ignore
 //! inp: &[i32]
 //! ```
 //!
@@ -216,7 +216,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Token embedding weights
 //!
-//! ```rust
+//! ```rust,ignore
 //! wte: &[f32]
 //! ```
 //!
@@ -232,7 +232,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Positional embeddings
 //!
-//! ```rust
+//! ```rust,ignore
 //! wpe: &[f32]
 //! ```
 //!
@@ -248,14 +248,14 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ## The main loops
 //!
-//! ```rust
+//! ```rust,ignore
 //! for b in 0..B {
 //! for t in 0..T {
 //! ```
 //!
 //! For every batch and every token position.
 //!
-//! ```rust
+//! ```rust,ignore
 //! let out_bt = &mut out[b * T * C + t * C..][..C];
 //! ```
 //!
@@ -277,7 +277,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Then:
 //!
-//! ```rust
+//! ```rust,ignore
 //! [..C]
 //! ```
 //!
@@ -293,7 +293,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Next:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let ix = inp[b * T + t] as usize;
 //! ```
 //!
@@ -301,13 +301,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The conversion is necessary because slice indices in Rust use `usize`.
 //!
-//! ```rust
+//! ```rust,ignore
 //! let wte_ix = &wte[ix * C..][..C];
 //! ```
 //!
 //! Gets the embedding vector for token `ix`.
 //!
-//! ```rust
+//! ```rust,ignore
 //! let wpe_t = &wpe[t * C..][..C];
 //! ```
 //!
@@ -315,7 +315,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Finally:
 //!
-//! ```rust
+//! ```rust,ignore
 //! for i in 0..C {
 //! out_bt[i] = wte_ix[i] + wpe_t[i];
 //! }
@@ -357,7 +357,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Therefore:
 //!
-//! ```rust
+//! ```rust,ignore
 //! dwte_ix[i] += d;
 //! dwpe_t[i] += d;
 //! ```
@@ -378,7 +378,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The function:
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub fn layernorm_forward(...)
 //! ```
 //!
@@ -392,7 +392,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Step 1: Calculate the mean
 //!
-//! ```rust
+//! ```rust,ignore
 //! let mut m = 0.0f32;
 //! for i in 0..C {
 //! m += x[i];
@@ -410,7 +410,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Step 2: Calculate variance
 //!
-//! ```rust
+//! ```rust,ignore
 //! let mut v = 0.0f32;
 //! for i in 0..C {
 //! let xshift = x[i] - m;
@@ -427,7 +427,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Step 3: Reciprocal standard deviation
 //!
-//! ```rust
+//! ```rust,ignore
 //! let eps = 1e-5f32;
 //! let s = 1.0f32 / (v + eps).sqrt();
 //! ```
@@ -442,7 +442,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Step 4: Normalize, scale, and shift
 //!
-//! ```rust
+//! ```rust,ignore
 //! let n = s * (x[i] - m);
 //! let o = n * weight[i] + bias[i];
 //! ```
@@ -465,7 +465,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The naive implementation begins with:
 //!
-//! ```rust
+//! ```rust,ignore
 //! out.par_chunks_exact_mut(OC)
 //! .enumerate()
 //! .for_each(|(bt, out_bt)| {
@@ -475,13 +475,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Normally, you might write:
 //!
-//! ```rust
+//! ```rust,ignore
 //! for bt in 0..B * T {
 //! ```
 //!
 //! But Rayon allows:
 //!
-//! ```rust
+//! ```rust,ignore
 //! .par_chunks_exact_mut(OC)
 //! ```
 //!
@@ -509,7 +509,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Inside:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let inp_bt = &inp[bt * C..(bt + 1) * C];
 //! ```
 //!
@@ -517,26 +517,26 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Then:
 //!
-//! ```rust
+//! ```rust,ignore
 //! for o in 0..OC {
 //! let mut val = bias.map_or(0.0f32, |bias| bias[o]);
 //! ```
 //!
 //! `bias` has the type:
 //!
-//! ```rust
+//! ```rust,ignore
 //! Option<&[f32]>
 //! ```
 //!
 //! So it may be either:
 //!
-//! ```rust
+//! ```rust,ignore
 //! Some(bias)
 //! ```
 //!
 //! or:
 //!
-//! ```rust
+//! ```rust,ignore
 //! None
 //! ```
 //!
@@ -546,7 +546,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Then the actual matrix multiplication is:
 //!
-//! ```rust
+//! ```rust,ignore
 //! for i in 0..C {
 //! val += inp_bt[i] * weight[o * C + i];
 //! }
@@ -562,13 +562,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 9. Optimized matrix multiplication
 //!
-//! ```rust
+//! ```rust,ignore
 //! const LOOP_UNROLL: usize = 8;
 //! ```
 //!
 //! Instead of calculating one `(B,T)` position at a time, this implementation calculates **eight positions simultaneously**.
 //!
-//! ```rust
+//! ```rust,ignore
 //! let mut result = [0.0f32; LOOP_UNROLL];
 //! ```
 //!
@@ -582,7 +582,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The important optimization is:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let w = weight[i + o * C];
 //!
 //! for ibt in 0..LOOP_UNROLL {
@@ -612,7 +612,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //! C       C      C
 //! ```
 //!
-//! ```rust
+//! ```rust,ignore
 //! let C3 = C * 3;
 //! let hs = C / NH;
 //! ```
@@ -629,7 +629,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The scale:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let scale = 1.0f32 / (hs as f32).sqrt();
 //! ```
 //!
@@ -647,7 +647,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Pass 1: Query × Key
 //!
-//! ```rust
+//! ```rust,ignore
 //! for t2 in 0..=t {
 //! ```
 //!
@@ -665,7 +665,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The dot product is:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let mut val = 0.0f32;
 //! for i in 0..hs {
 //! val += query_t[i] * key_t2[i];
@@ -683,7 +683,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Pass 2: Exponentiation
 //!
-//! ```rust
+//! ```rust,ignore
 //! let expv = (preatt_bth[t2] - maxval).exp();
 //! ```
 //!
@@ -707,7 +707,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Pass 3: Normalize
 //!
-//! ```rust
+//! ```rust,ignore
 //! att_bth[t2] *= expsum_inv;
 //! ```
 //!
@@ -721,7 +721,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Future positions are explicitly set to zero:
 //!
-//! ```rust
+//! ```rust,ignore
 //! att_bth[t2] = 0.0f32;
 //! ```
 //!
@@ -731,7 +731,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Pass 4: Weighted sum of Values
 //!
-//! ```rust
+//! ```rust,ignore
 //! out_bth[i] += att_btht2 * value_t2[i];
 //! ```
 //!
@@ -748,7 +748,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 11. GELU activation
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub const GELU_SCALING_FACTOR: f32 = 0.797_884_560_802_865_4;
 //! ```
 //!
@@ -760,7 +760,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The forward implementation:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let x = inp[i];
 //! let cube = 0.044715f32 * x * x * x;
 //! out[i] = 0.5f32 * x
@@ -790,7 +790,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The entire function is:
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub fn residual_forward(out: &mut [f32], inp1: &[f32], inp2: &[f32], N: usize) {
 //! for i in 0..N {
 //! out[i] = inp1[i] + inp2[i];
@@ -808,7 +808,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Backward is:
 //!
-//! ```rust
+//! ```rust,ignore
 //! dinp1[i] += dout[i];
 //! dinp2[i] += dout[i];
 //! ```
@@ -833,13 +833,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Softmax converts them into probabilities.
 //!
-//! ```rust
+//! ```rust,ignore
 //! probs_bt[i] = (logits_bt[i] - maxval).exp();
 //! ```
 //!
 //! Then:
 //!
-//! ```rust
+//! ```rust,ignore
 //! probs_bt[i] /= sum;
 //! ```
 //!
@@ -851,7 +851,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The padded vocabulary is interesting:
 //!
-//! ```rust
+//! ```rust,ignore
 //! V  = actual vocabulary size
 //! Vp = padded vocabulary size
 //! ```
@@ -869,7 +869,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ## Cross-entropy loss
 //!
-//! ```rust
+//! ```rust,ignore
 //! losses[b * T + t] = -probs_bt[ix].ln();
 //! ```
 //!
@@ -887,19 +887,19 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! This function combines both operations:
 //!
-//! ```rust
+//! ```rust,ignore
 //! crossentropy_softmax_backward(...)
 //! ```
 //!
 //! The core line is:
 //!
-//! ```rust
+//! ```rust,ignore
 //! dlogits_bt[i] += (p - indicator) * dloss;
 //! ```
 //!
 //! where:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let indicator = if i == ix { 1.0f32 } else { 0.0f32 };
 //! ```
 //!
@@ -919,7 +919,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 15. `TensorView`: safe tensor pointers
 //!
-//! ```rust
+//! ```rust,ignore
 //! #[derive(Clone, Copy, Debug)]
 //! pub struct TensorView {
 //! pub start: usize,
@@ -935,7 +935,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! For example:
 //!
-//! ```rust
+//! ```rust,ignore
 //! TensorView {
 //! start: 1000,
 //! len: 768,
@@ -954,7 +954,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! This allows code such as:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let a = self.acts.unwrap();
 //! let p = self.params;
 //! ```
@@ -971,7 +971,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Suppose one `Vec<f32>` contains multiple tensors. You want:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let tensor_a = &mut memory[0..100];
 //! let tensor_b = &mut memory[100..200];
 //! ```
@@ -982,7 +982,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Its signature uses **const generics**:
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub(crate) fn split_disjoint<'a, const N: usize>(
 //! buf: &'a mut [f32],
 //! ranges: [(usize, usize); N],
@@ -993,7 +993,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! If you call it with three ranges:
 //!
-//! ```rust
+//! ```rust,ignore
 //! split_disjoint(buffer, [range1, range2, range3])
 //! ```
 //!
@@ -1005,19 +1005,19 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! and returns:
 //!
-//! ```rust
+//! ```rust,ignore
 //! [&mut [f32]; 3]
 //! ```
 //!
 //! Before borrowing, it checks:
 //!
-//! ```rust
+//! ```rust,ignore
 //! assert!(start + len <= buf.len(), "tensor view out of bounds");
 //! ```
 //!
 //! Then:
 //!
-//! ```rust
+//! ```rust,ignore
 //! assert!(start >= prev_end, "tensor views must be pairwise disjoint");
 //! ```
 //!
@@ -1047,7 +1047,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 17. Parameter tensors
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub struct ParameterTensors {
 //! pub wte: TensorView,
 //! pub wpe: TensorView,
@@ -1059,7 +1059,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! For example:
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub qkvw: TensorView, // (L, 3*C, C)
 //! ```
 //!
@@ -1069,7 +1069,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The actual data is here:
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub params_memory: Vec<f32>,
 //! ```
 //!
@@ -1094,7 +1094,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! For example:
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub qkv: TensorView,
 //! pub att: TensorView,
 //! pub fch_gelu: TensorView,
@@ -1109,7 +1109,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! For example, the GELU backward pass needs the original input:
 //!
-//! ```rust
+//! ```rust,ignore
 //! gelu_backward(dl_fch, l_fch, dl_fch_gelu, ...)
 //! ```
 //!
@@ -1119,7 +1119,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 19. The `GPT2` struct: the complete model state
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub struct GPT2 {
 //! ```
 //!
@@ -1129,19 +1129,19 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Model configuration
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub config: GPT2Config,
 //! ```
 //!
 //! ### Model parameters
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub params_memory: Vec<f32>,
 //! ```
 //!
 //! ### Parameter gradients
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub grads_memory: Option<Vec<f32>>,
 //! ```
 //!
@@ -1149,7 +1149,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### AdamW optimizer state
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub m_memory: Option<Vec<f32>>,
 //! pub v_memory: Option<Vec<f32>>,
 //! ```
@@ -1161,7 +1161,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Activations
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub acts_memory: Option<Vec<f32>>,
 //! ```
 //!
@@ -1173,25 +1173,25 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 20. Loading the checkpoint
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub fn build_from_checkpoint(checkpoint_path: &str) -> GPT2
 //! ```
 //!
 //! The argument:
 //!
-//! ```rust
+//! ```rust,ignore
 //! &str
 //! ```
 //!
 //! is a borrowed string slice. The function doesn't need to own the path.
 //!
-//! ```rust
+//! ```rust,ignore
 //! let mut model_file = fopen_check(checkpoint_path, "rb");
 //! ```
 //!
 //! Opens the checkpoint.
 //!
-//! ```rust
+//! ```rust,ignore
 //! let model_header = read_i32s(&mut model_file, 256);
 //! ```
 //!
@@ -1199,13 +1199,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Then:
 //!
-//! ```rust
+//! ```rust,ignore
 //! if model_header[0] != 20240326 {
 //! ```
 //!
 //! checks the **magic number**. This verifies that the file is in the expected format.
 //!
-//! ```rust
+//! ```rust,ignore
 //! if model_header[1] != 3 {
 //! ```
 //!
@@ -1217,7 +1217,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The most important function is:
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub fn gpt2_forward(&mut self, ...)
 //! ```
 //!
@@ -1265,7 +1265,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The loop:
 //!
-//! ```rust
+//! ```rust,ignore
 //! for l in 0..L {
 //! ```
 //!
@@ -1273,7 +1273,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Inside, these lines are essentially the architecture of GPT-2 written directly as code:
 //!
-//! ```rust
+//! ```rust,ignore
 //! layernorm_forward(...)
 //! matmul_forward(...)      // create Q, K, V
 //! attention_forward(...)
@@ -1294,7 +1294,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! This code:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let [l_ln1, l_ln1_mean, ..., residual] =
 //! split_disjoint(acts_memory, [...]);
 //! ```
@@ -1303,7 +1303,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! It is similar in spirit to:
 //!
-//! ```rust
+//! ```rust,ignore
 //! let [a, b, c] = array;
 //! ```
 //!
@@ -1321,7 +1321,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The backward function contains:
 //!
-//! ```rust
+//! ```rust,ignore
 //! for l in (0..L).rev() {
 //! ```
 //!
@@ -1367,7 +1367,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 24. Starting backpropagation
 //!
-//! ```rust
+//! ```rust,ignore
 //! let dloss_mean = 1.0f32 / (B * T) as f32;
 //! ```
 //!
@@ -1389,7 +1389,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The code initializes every loss gradient with this value:
 //!
-//! ```rust
+//! ```rust,ignore
 //! dlosses[i] = dloss_mean;
 //! ```
 //!
@@ -1401,13 +1401,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The final major function is:
 //!
-//! ```rust
+//! ```rust,ignore
 //! pub fn gpt2_update(...)
 //! ```
 //!
 //! For every parameter:
 //!
-//! ```rust
+//! ```rust,ignore
 //! for i in 0..*num_parameters {
 //! ```
 //!
@@ -1415,7 +1415,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### First moment
 //!
-//! ```rust
+//! ```rust,ignore
 //! let m = beta1 * m_memory[i]
 //! + (1.0f32 - beta1) * grad;
 //! ```
@@ -1424,7 +1424,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Second moment
 //!
-//! ```rust
+//! ```rust,ignore
 //! let v = beta2 * v_memory[i]
 //! + (1.0f32 - beta2) * grad * grad;
 //! ```
@@ -1433,7 +1433,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Bias correction
 //!
-//! ```rust
+//! ```rust,ignore
 //! let m_hat = m / (1.0f32 - beta1.powf(t as f32));
 //! let v_hat = v / (1.0f32 - beta2.powf(t as f32));
 //! ```
@@ -1442,7 +1442,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Finally:
 //!
-//! ```rust
+//! ```rust,ignore
 //! params_memory[i] -= learning_rate
 //! * (m_hat / (v_hat.sqrt() + eps)
 //! + weight_decay * param);
@@ -1466,7 +1466,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! But the Rust code ends with:
 //!
-//! ```rust
+//! ```rust,ignore
 //! // gpt2_free() has no Rust equivalent: all model memory is freed when the GPT2 is dropped
 //! ```
 //!
@@ -1474,7 +1474,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! When:
 //!
-//! ```rust
+//! ```rust,ignore
 //! GPT2
 //! ```
 //!
@@ -1517,7 +1517,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! All tensors are packed into a few large:
 //!
-//! ```rust
+//! ```rust,ignore
 //! Vec<f32>
 //! ```
 //!
@@ -1527,7 +1527,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Instead of raw pointers, the implementation uses:
 //!
-//! ```rust
+//! ```rust,ignore
 //! TensorView { start, len }
 //! split_disjoint(...)
 //! &[f32]
@@ -1553,7 +1553,13 @@ mod model;
 mod tensor;
 
 pub use crate::gpt2::GPT2;
-pub use crate::layers::*;
+pub use crate::layers::{
+    GELU_SCALING_FACTOR, attention_backward, attention_forward, crossentropy_forward,
+    crossentropy_softmax_backward, encoder_backward, encoder_forward, gelu_backward, gelu_forward,
+    layernorm_backward, layernorm_forward, matmul_backward, matmul_forward, matmul_forward_naive,
+    residual_backward, residual_forward, softmax_forward,
+};
+
 pub use crate::model::{
     ActivationTensors, GPT2Config, NUM_ACTIVATION_TENSORS, NUM_PARAMETER_TENSORS, ParameterTensors,
     fill_in_activation_sizes, fill_in_parameter_sizes, malloc_and_point_activations,
