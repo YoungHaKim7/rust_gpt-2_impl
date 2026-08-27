@@ -22,5 +22,5 @@ make verify     # compiles the original llm.c with gcc and compares both step by
 
 `make verify` result: the Rust port reproduces the C loss trajectory **bit-for-bit**
 (46/46 loss values identical, generation output byte-identical), and runs ~5x faster
-than the single-threaded C build thanks to rayon. See [gpt2/README.md](gpt2/README.md).
+than the single-threaded C build thanks to rayon. See [gpt2/README.md](benches/README.md).
 
