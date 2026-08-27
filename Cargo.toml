@@ -15,3 +15,7 @@ glob = "0.3"
 # keep IEEE-strict float math (no fast-math equivalents), like the C reference
 # compiled without -Ofast; speeds up the kernels via codegen only
 debug = false
+
+# https://crates.io/crates/rust-latex-doc-minimal-example
+# [package.metadata.docs.rs]
+# rustdoc-args = [ "--html-in-header", "katex-header.html" ]
