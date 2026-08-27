@@ -8,12 +8,12 @@ Ported 1:1 from llm.c/llmc/dataloader.h.
 
 #![allow(non_snake_case)]
 
-use std::fs::File;
-use std::path::PathBuf;
-use std::process::exit;
+use std::{fs::File, path::PathBuf, process::exit};
 
-use super::rand::{Mt19937State, init_identity_permutation, manual_seed, random_permutation};
-use super::utils::{fopen_check, fseek_check, read_i32s, read_u16s};
+use super::{
+    rand::{Mt19937State, init_identity_permutation, manual_seed, random_permutation},
+    utils::{fopen_check, fseek_check, read_i32s, read_u16s},
+};
 
 // ----------------------------------------------------------------------------
 // Distributed Data Loader

@@ -9,9 +9,11 @@
 
 #![allow(non_snake_case)]
 
-use std::fs::File;
-use std::io::{Read, Seek, SeekFrom, Write};
-use std::process::exit;
+use std::{
+    fs::File,
+    io::{Read, Seek, SeekFrom, Write},
+    process::exit,
+};
 
 // ----------------------------------------------------------------------------
 // fread convenience utils, with nice handling of error checking

@@ -1,4 +1,7 @@
-use rayon::prelude::*;
+use rayon::{
+    iter::{IndexedParallelIterator, ParallelIterator},
+    slice::ParallelSliceMut,
+};
 
 // B and T are kept in the signature to mirror the C reference (the parallel
 // iteration is over the collapsed B*T rows)

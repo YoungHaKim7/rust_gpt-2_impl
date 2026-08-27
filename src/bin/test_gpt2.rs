@@ -9,8 +9,10 @@ reference values exported by `python train_gpt2.py` into gpt2_124M_debug_state.b
 #![allow(clippy::excessive_precision)]
 #![allow(clippy::needless_range_loop)] // the loops mirror the C reference index-by-index
 
-use rust_gpt_2_impl::llmc::utils::{read_f32s, read_i32s};
-use rust_gpt_2_impl::{GPT2, malloc_and_point_parameters};
+use rust_gpt_2_impl::{
+    llmc::utils::{read_f32s, read_i32s},
+    {GPT2, malloc_and_point_parameters},
+};
 
 // poor man's tensor checker
 fn check_tensor(a: &[f32], b: &[f32], label: &str) -> bool {

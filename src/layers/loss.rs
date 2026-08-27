@@ -1,4 +1,7 @@
-use rayon::prelude::*;
+use rayon::{
+    iter::{IndexedParallelIterator, ParallelIterator},
+    slice::ParallelSliceMut,
+};
 
 #[allow(unused_variables)] // B and T kept for signature parity with the C reference
 pub fn softmax_forward(probs: &mut [f32], logits: &[f32], B: usize, T: usize, V: usize, Vp: usize) {

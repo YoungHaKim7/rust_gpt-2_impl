@@ -3,14 +3,21 @@
 // defines: GPT2 (build_from_checkpoint, gpt2_forward, gpt2_zero_grad,
 //                  gpt2_backward, gpt2_update)
 
-use crate::layers::*;
-use crate::llmc::utils::{fopen_check, read_f32s, read_i32s};
-use crate::model::{
-    ActivationTensors, GPT2Config, NUM_ACTIVATION_TENSORS, NUM_PARAMETER_TENSORS, ParameterTensors,
-    fill_in_activation_sizes, fill_in_parameter_sizes, malloc_and_point_activations,
-    malloc_and_point_parameters,
+use crate::{
+    llmc::utils::{fopen_check, read_f32s, read_i32s},
+    model::{
+        ActivationTensors, GPT2Config, NUM_ACTIVATION_TENSORS, NUM_PARAMETER_TENSORS,
+        ParameterTensors, fill_in_activation_sizes, fill_in_parameter_sizes,
+        malloc_and_point_activations, malloc_and_point_parameters,
+    },
+    tensor::split_disjoint,
+    {
+        attention_backward, attention_forward, crossentropy_forward, crossentropy_softmax_backward,
+        encoder_backward, encoder_forward, gelu_backward, gelu_forward, layernorm_backward,
+        layernorm_forward, matmul_backward, matmul_forward, residual_backward, residual_forward,
+        softmax_forward,
+    },
 };
-use crate::tensor::split_disjoint;
 
 pub struct GPT2 {
     pub config: GPT2Config,

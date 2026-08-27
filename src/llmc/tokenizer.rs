@@ -9,8 +9,7 @@ Ported 1:1 from llm.c/llmc/tokenizer.h.
 
 #![allow(non_snake_case)]
 
-use std::io::Write;
-use std::process::exit;
+use std::{io::Write, process::exit};
 
 use super::utils::{fread_check, read_bytes, read_u32s};
 
