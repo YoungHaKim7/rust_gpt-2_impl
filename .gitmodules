@@ -1,0 +1,3 @@
+[submodule "sub"]
+	path = llm.c
+	url = https://github.com/karpathy/llm.c
