@@ -5,7 +5,6 @@
 
 ├── dev
 │  └── verify_vs_c.sh
-├── lib.rs.md
 ├── llm.c
 ├── Makefile
 ├── src
