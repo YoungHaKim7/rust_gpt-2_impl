@@ -472,7 +472,7 @@ y_i =
 \beta_i
 $$
 
-where `weight` is \(\gamma\) and `bias` is \(\beta\).
+where `weight` is $$\(\gamma\)$$ and `bias` is $$\(\beta\)$$.
 
 ---
 
