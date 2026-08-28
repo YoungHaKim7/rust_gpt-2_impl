@@ -1,3 +1,36 @@
+# doc fix
+
+- Fixed and verified — docs build with the header injected, no `RUSTDOCFLAGS` needed:
+
+```fish
+cargo doc --no-deps   # or just: cargo docs  (opens in browser)
+```
+
+What was wrong:
+
+| Issue                   | Cause                                                                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Config ignored          | File was named `.config.toml`; Cargo only reads `config.toml`                                                                                                 |
+| Deps failed to document | `--html-in-header ./src/docs-header.html` is resolved per-crate against each dependency's own source dir in `~/.cargo/registry`, where the file doesn't exist |
+
+`--no-deps` sidesteps the path problem: only your crate is documented, and rustdoc's cwd is your package root, where `./src/docs-header.html` resolves correctly. I also added a `docs` alias (`doc --no-deps --open`) to `.cargo/config.toml`.
+
+If you ever need `cargo doc` *with* dependency docs, the flag must be an absolute path instead:
+
+```fish
+RUSTDOCFLAGS="--html-in-header $PWD/src/docs-header.html" cargo doc
+```
+# bug
+
+- Fixed and verified. The generated HTML now keeps the `$$...$$` pairs intact in one paragraph, so KaTeX renders both formulas, and the bogus `#fracpartial-lpartial-a` heading is gone from the TOC.
+
+**What was wrong:** rustdoc's markdown parser treats a line containing only `=` as a setext heading underline. It consumed the `=`, promoted `$$ \frac{\partial L}{\partial a}` to an `<h2>`, and split the closing half into a separate paragraph. Each piece had an unpaired `$$`, so KaTeX's auto-render skipped both. The math setup in `src/docs-header.html` was working all along.
+
+Two follow-up notes:
+
+- The same trap applies to lines of only `-` — a `-` directly under a text line (no blank line between) also makes a setext heading. Your `//! ---` separators are safe because they're preceded by blank `//!` lines, making them thematic breaks instead.
+- `src/docs-header.html` and `.cargo/config.toml` are untracked. Worth committing them — without those two files the math rendering silently breaks for anyone else who clones the repo.
+
 # divided conquer code
 
 - Done. The 1469-line `src/lib.rs` monolith is now divided by function into 11 files, following the same per-file pattern `src/llmc/` already uses:

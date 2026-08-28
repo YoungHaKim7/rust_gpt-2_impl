@@ -70,6 +70,8 @@ name = "rust_gpt-2_impl"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
+ "crossbeam-utils",
+ "either",
  "glob",
  "rayon",
 ]

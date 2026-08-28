@@ -31,19 +31,19 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! `lib.rs` is the conventional root module of a Rust **library crate**.
 //!
-//! ```rust,ignore
+//! ```rust
 //! pub mod llmc;
 //! ```
 //!
 //! This declares a public module named `llmc`. Code outside this crate can access its public items.
 //!
-//! ```rust,ignore
+//! ```rust
 //! use rayon::prelude::*;
 //! ```
 //!
 //! This imports Rayon traits needed for parallel iteration, such as:
 //!
-//! ```rust,ignore
+//! ```rust
 //! .par_chunks_exact_mut(...)
 //! .for_each(...)
 //! ```
@@ -76,13 +76,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Instead:
 //!
-//! ```rust,ignore
+//! ```rust
 //! Vec<f32>
 //! ```
 //!
 //! owns one large allocation, and each tensor is represented by:
 //!
-//! ```rust,ignore
+//! ```rust
 //! TensorView {
 //! start: ...,
 //! len: ...,
@@ -107,7 +107,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 3. Compiler attributes
 //!
-//! ```rust,ignore
+//! ```rust
 //! #![allow(non_snake_case)]
 //! #![allow(clippy::too_many_arguments)]
 //! #![allow(clippy::needless_range_loop)]
@@ -119,13 +119,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Rust normally prefers:
 //!
-//! ```rust,ignore
+//! ```rust
 //! let batch_size = 32;
 //! ```
 //!
 //! But machine-learning code conventionally uses mathematical names:
 //!
-//! ```rust,ignore
+//! ```rust
 //! B, T, C, V
 //! ```
 //!
@@ -176,7 +176,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 5. `encoder_forward`: converting tokens into vectors
 //!
-//! ```rust,ignore
+//! ```rust
 //! pub fn encoder_forward(
 //! out: &mut [f32],
 //! inp: &[i32],
@@ -192,7 +192,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Output
 //!
-//! ```rust,ignore
+//! ```rust
 //! out: &mut [f32]
 //! ```
 //!
@@ -345,14 +345,14 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! then:
 //!
-//! $\frac{\partial L}{\partial a} = \frac{\partial L}{\partial y}$
+//! $$
+//! \frac{\partial L}{\partial a} = \frac{\partial L}{\partial y}
+//! $$
 //!
 //! and:
 //!
 //! $$
-//! \frac{\partial L}{\partial b}
-//! =
-//! \frac{\partial L}{\partial y}
+//! \frac{\partial L}{\partial b} = \frac{\partial L}{\partial y}
 //! $$
 //!
 //! Therefore:
@@ -410,7 +410,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Step 2: Calculate variance
 //!
-//! ```rust,ignore
+//! ```rust
 //! let mut v = 0.0f32;
 //! for i in 0..C {
 //! let xshift = x[i] - m;
@@ -465,7 +465,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The naive implementation begins with:
 //!
-//! ```rust,ignore
+//! ```rust
 //! out.par_chunks_exact_mut(OC)
 //! .enumerate()
 //! .for_each(|(bt, out_bt)| {
@@ -905,11 +905,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! This represents the famous simplification:
 //!
-//! $$
-//! \frac{\partial L}{\partial logits_i}
-//! =
-//! p_i - y_i
-//! $$
+//! $$ \frac{\partial L}{\partial logits_i} = p_i - y_i $$
 //!
 //! where `y` is the one-hot target vector.
 //!
@@ -1367,7 +1363,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! # 24. Starting backpropagation
 //!
-//! ```rust,ignore
+//! ```rust
 //! let dloss_mean = 1.0f32 / (B * T) as f32;
 //! ```
 //!
@@ -1381,15 +1377,11 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Therefore:
 //!
-//! $$
-//! \frac{\partial L}{\partial loss_{b,t}}
-//! =
-//! \frac{1}{BT}
-//! $$
+//! $$ \frac{\partial L}{\partial loss_{b,t}} = \frac{1}{BT} $$
 //!
 //! The code initializes every loss gradient with this value:
 //!
-//! ```rust,ignore
+//! ```rust
 //! dlosses[i] = dloss_mean;
 //! ```
 //!
@@ -1401,13 +1393,13 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! The final major function is:
 //!
-//! ```rust,ignore
+//! ```rust
 //! pub fn gpt2_update(...)
 //! ```
 //!
 //! For every parameter:
 //!
-//! ```rust,ignore
+//! ```rust
 //! for i in 0..*num_parameters {
 //! ```
 //!
@@ -1415,7 +1407,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### First moment
 //!
-//! ```rust,ignore
+//! ```rust
 //! let m = beta1 * m_memory[i]
 //! + (1.0f32 - beta1) * grad;
 //! ```
@@ -1424,7 +1416,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Second moment
 //!
-//! ```rust,ignore
+//! ```rust
 //! let v = beta2 * v_memory[i]
 //! + (1.0f32 - beta2) * grad * grad;
 //! ```
@@ -1433,7 +1425,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! ### Bias correction
 //!
-//! ```rust,ignore
+//! ```rust
 //! let m_hat = m / (1.0f32 - beta1.powf(t as f32));
 //! let v_hat = v / (1.0f32 - beta2.powf(t as f32));
 //! ```
@@ -1442,7 +1434,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Finally:
 //!
-//! ```rust,ignore
+//! ```rust
 //! params_memory[i] -= learning_rate
 //! * (m_hat / (v_hat.sqrt() + eps)
 //! + weight_decay * param);
@@ -1517,7 +1509,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! All tensors are packed into a few large:
 //!
-//! ```rust,ignore
+//! ```rust
 //! Vec<f32>
 //! ```
 //!
@@ -1527,7 +1519,7 @@ Everything is re-exported at the crate root below, so the public API is flat.
 //!
 //! Instead of raw pointers, the implementation uses:
 //!
-//! ```rust,ignore
+//! ```rust
 //! TensorView { start, len }
 //! split_disjoint(...)
 //! &[f32]
