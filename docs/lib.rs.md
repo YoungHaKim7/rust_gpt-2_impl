@@ -770,7 +770,17 @@ out[i] = 0.5f32 * x
 
 This is the approximate GELU function used by GPT-2:
 
-$$\operatorname{GELU}(x)\approx\frac{x}{2}\left[1+\tanh\left(\sqrt{\frac{2}{\pi}}(x+0.044715x^3)\right)\right]$$
+$$
+\mathrm{GELU}(x)
+\approx
+\frac{x}{2}
+\left[
+1+\tanh\left(
+\sqrt{\frac{2}{\pi}}
+\left(x+0.044715x^3\right)
+\right)
+\right]
+$$
 
 It is applied element-by-element.
 
