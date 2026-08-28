@@ -1,3 +1,7 @@
+# 공부 참고할 자료
+- Reproducing GPT-2 (124M) in llm.c in 90 minutes for $20 #481 | karpathy started this conversation in General | karpathy | on May 29, 2024
+  - https://github.com/karpathy/llm.c/discussions/481
+
 # doc fix
 
 - Fixed and verified — docs build with the header injected, no `RUSTDOCFLAGS` needed:
