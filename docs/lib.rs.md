@@ -328,13 +328,7 @@ for i in 0..C {
 
 Mathematically:
 
-$$
-\text{embedding}(token, position)
-=
-\text{token embedding}(token)
-+
-\text{position embedding}(position)
-$$
+$$ \text{embedding}(token, position) = \text{token embedding}(token) + \text{position embedding}(position)$$
 
 ---
 
@@ -356,19 +350,11 @@ $$
 
 then:
 
-$$
-\frac{\partial L}{\partial a}
-=
-\frac{\partial L}{\partial y}
-$$
+$$ \frac{\partial L}{\partial a} = \frac{\partial L}{\partial y} $$
 
 and:
 
-$$
-\frac{\partial L}{\partial b}
-=
-\frac{\partial L}{\partial y}
-$$
+$$ \frac{\partial L}{\partial b} = \frac{\partial L}{\partial y} $$
 
 Therefore:
 
@@ -784,18 +770,7 @@ out[i] = 0.5f32 * x
 
 This is the approximate GELU function used by GPT-2:
 
-$$
-\operatorname{GELU}(x)
-\approx
-\frac{x}{2}
-\left[
-1+\tanh
-\left(
-\sqrt{\frac{2}{\pi}}
-(x+0.044715x^3)
-\right)
-\right]
-$$
+$$\operatorname{GELU}(x)\approx\frac{x}{2}\left[1+\tanh\left(\sqrt{\frac{2}{\pi}}(x+0.044715x^3)\right)\right]$$
 
 It is applied element-by-element.
 
@@ -920,11 +895,7 @@ let indicator = if i == ix { 1.0f32 } else { 0.0f32 };
 
 This represents the famous simplification:
 
-$$
-\frac{\partial L}{\partial logits_i}
-=
-p_i - y_i
-$$
+$$\frac{\partial L}{\partial logits_i}=p_i - y_i$$
 
 where `y` is the one-hot target vector.
 
@@ -1396,11 +1367,7 @@ $$
 
 Therefore:
 
-$$
-\frac{\partial L}{\partial loss_{b,t}}
-=
-\frac{1}{BT}
-$$
+$$\frac{\partial L}{\partial loss_{b,t}}=\frac{1}{BT}$$
 
 The code initializes every loss gradient with this value:
 
