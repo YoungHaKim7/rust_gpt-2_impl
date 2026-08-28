@@ -3,6 +3,9 @@
   - https://github.com/karpathy/llm.c
   - https://github.com/GaoYusong/llm.cpp
   - https://github.com/ToJen/llm.rs
+
+- `enum` & `struct` version
+  - https://github.com/YoungHaKim7/rust_gpt-2_struct_enum_version
   
 ## Rust port (this repo's implementation): `gpt2/`
 
