@@ -1,4 +1,31 @@
 # rust_gpt-2_impl
+
+<br />
+
+<p align="center">
+  <!-- Crates version -->
+  <a href="https://crates.io/crates/rust_gpt-2_impl">
+    <img src="https://img.shields.io/crates/v/rust_gpt-2_impl.svg?style=flat-square"
+    alt="Crates.io version" />
+  </a>
+  <!-- Downloads -->
+  <a href="https://crates.io/crates/rust_gpt-2_impl">
+    <img src="https://img.shields.io/crates/d/rust_gpt-2_impl.svg?style=flat-square"
+      alt="Download" />
+  </a>
+  <!-- docs.rs docs -->
+  <a href="https://docs.rs/rust_gpt-2_impl">
+    <img src="https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square"
+      alt="docs.rs docs" />
+  </a>
+  <!-- Rust version -->
+  <a href="https://www.rust-lang.org/" rel="nofollow noopener noreferrer">
+    <img src="https://img.shields.io/badge/Rust-1.98+-orange.svg" alt="Rust">
+  </a>
+</p>
+
+<br />
+
 - 러스트언어로 바꾸기 | llm.c를 사용하여 GPT-2 모델을 저렴하게 재구현하기 
   - https://github.com/karpathy/llm.c
   - https://github.com/GaoYusong/llm.cpp
