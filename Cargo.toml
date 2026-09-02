@@ -1,10 +1,14 @@
 [package]
 name = "rust_gpt-2_impl"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Faithful Rust port of karpathy/llm.c's pure-CPU GPT-2 trainer (train_gpt2.c)"
 license = "MIT"
 rust-version = "1.98"
+repository = "https://github.com/YoungHaKim7/rust_gpt-2_impl"
+documentation = "https://docs.rs/rust_gpt-2_impl"
+keywords = ["gpt2"]
+categories = ["development-tools", "artificial-intelligence"]
 
 [dependencies]
 rayon = "1.10"
